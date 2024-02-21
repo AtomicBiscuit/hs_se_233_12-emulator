@@ -127,12 +127,12 @@ namespace stack {
     template<class T>
     void Stack<T>::_increase_capacity() {
         _capacity = _capacity * 2 + 1;
-        auto _data = new T[_capacity];
+        auto data = new T[_capacity];
         for (uint64_t i = 0; i < _size; i++) {
-            _data[i] = std::move(_data[i]);
+            data[i] = std::move(_data[i]);
         }
         delete[] _data;
-        _data = _data;
+        _data = data;
     }
 
     template<class T>
