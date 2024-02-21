@@ -1,0 +1,1 @@
+add_library(Stacker INTERFACE stack.h)
