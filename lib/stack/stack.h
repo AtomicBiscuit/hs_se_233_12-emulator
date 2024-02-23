@@ -52,15 +52,6 @@ namespace stack {
             typename iterator::reference operator*() const {
                 return *_ptr;
             }
-
-            typename iterator::difference_type constexpr operator-(const iterator &other) {
-                return _ptr - other._ptr;
-            }
-
-            friend typename iterator::difference_type constexpr distance(iterator first, iterator last) {
-                std::cout << "USED1" << std::endl;
-                return last - first;
-            }
         };
 
         iterator begin();
@@ -68,13 +59,14 @@ namespace stack {
         iterator end();
 
     public:
+
         Stack() = default;
 
         explicit Stack(uint32_t);
 
-        Stack(Stack &);
+        Stack(const Stack &);
 
-        Stack(const Stack &&) noexcept;
+        Stack(Stack &&) noexcept;
 
         ~Stack();
 
@@ -84,7 +76,7 @@ namespace stack {
 
         Stack &push(const T &);
 
-        Stack &push(const T &&);
+        Stack &push(T &&);
 
         T &top();
 
@@ -92,8 +84,15 @@ namespace stack {
 
         uint32_t size();
 
+        uint32_t capacity();
+
         bool empty();
     };
+
+    template<class T>
+    uint32_t Stack<T>::capacity() {
+        return _capacity;
+    }
 
     template<class T>
     Stack<T>::iterator Stack<T>::end() {
@@ -112,7 +111,7 @@ namespace stack {
 
     template<class T>
     uint32_t Stack<T>::size() {
-        return std::distance(this->begin(), this->end());
+        return _size;
     }
 
     template<class T>
@@ -125,7 +124,7 @@ namespace stack {
     }
 
     template<class T>
-    Stack<T>::Stack(Stack &other) {
+    Stack<T>::Stack(const Stack &other) {
         if (other._size == 0) {
             return;
         }
@@ -138,7 +137,7 @@ namespace stack {
     }
 
     template<class T>
-    Stack<T>::Stack(const Stack &&other) noexcept {
+    Stack<T>::Stack(Stack &&other) noexcept {
         _data = other._data;
         _capacity = other._capacity;
         _size = other._size;
@@ -159,6 +158,7 @@ namespace stack {
         for (uint32_t i = 0; i < other._size; i++) {
             _data[i] = other._data[i];
         }
+        return *this;
     }
 
     template<class T>
@@ -183,7 +183,7 @@ namespace stack {
     }
 
     template<class T>
-    Stack<T> &Stack<T>::push(const T &&obj) {
+    Stack<T> &Stack<T>::push(T &&obj) {
         if (_size == _capacity) {
             _resize(_capacity * 2 + 1);
         }

@@ -1,1 +1,1 @@
-add_library(Stacker INTERFACE stack.h)
+add_subdirectory("stack")

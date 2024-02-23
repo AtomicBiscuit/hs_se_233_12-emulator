@@ -1,7 +1,7 @@
-add_executable(Mainer main.cpp)
+add_executable(Main main.cpp)
 
-target_include_directories(Mainer PRIVATE
-        "${PROJECT_SOURCE_DIR}/lib"
+target_include_directories(Main PRIVATE
+        "${PROJECT_SOURCE_DIR}/lib/stack"
 )
 
-target_link_libraries(Mainer PRIVATE Stacker)
+target_link_libraries(Main PRIVATE Stack)
