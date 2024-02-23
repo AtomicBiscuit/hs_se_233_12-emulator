@@ -6,8 +6,10 @@ int main() {
     for (int i = 0; i < 20; i++) {
         a.push(i);
     }
-    for (int i = 0; i < 21; i++) {
-        std::cout << a.pop() << std::endl;
+    while (not a.empty()) {
+        std::cout << a.top() << " ";
+        a.pop();
     }
+    std::cout << a.size() << std::endl;
     return 0;
 }

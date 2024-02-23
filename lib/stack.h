@@ -4,6 +4,7 @@
 #include <utility>
 #include <cassert>
 #include <iostream>
+#include <stdexcept>
 
 namespace stack {
 
@@ -11,15 +12,65 @@ namespace stack {
     class Stack {
     private:
         T *_data = nullptr;
-        uint64_t _size = 0;
-        uint64_t _capacity = 0;
+        uint32_t _size = 0;
+        uint32_t _capacity = 0;
 
-        void _increase_capacity();
+        void _resize(uint32_t new_size);
+
+        class iterator : public std::iterator<
+                std::bidirectional_iterator_tag,
+                T,
+                long long,
+                T *,
+                T &
+        > {
+        private:
+            typename iterator::pointer _ptr;
+        public:
+            explicit iterator(typename iterator::pointer ptr) : _ptr(ptr) {}
+
+            iterator(const iterator &other) : _ptr(other._ptr) {}
+
+            iterator &operator++() {
+                ++_ptr;
+                return *this;
+            }
+
+            iterator operator++(int) { return iterator(_ptr++); }
+
+            iterator &operator--() {
+                --_ptr;
+                return *this;
+            }
+
+            iterator operator--(int) { return iterator(_ptr--); }
+
+            bool operator==(iterator other) const { return _ptr == other._ptr; }
+
+            bool operator!=(iterator other) const { return _ptr != other._ptr; }
+
+            typename iterator::reference operator*() const {
+                return *_ptr;
+            }
+
+            typename iterator::difference_type constexpr operator-(const iterator &other) {
+                return _ptr - other._ptr;
+            }
+
+            friend typename iterator::difference_type constexpr distance(iterator first, iterator last) {
+                std::cout << "USED1" << std::endl;
+                return last - first;
+            }
+        };
+
+        iterator begin();
+
+        iterator end();
 
     public:
         Stack() = default;
 
-        explicit Stack(uint64_t);
+        explicit Stack(uint32_t);
 
         Stack(Stack &);
 
@@ -35,20 +86,37 @@ namespace stack {
 
         Stack &push(const T &&);
 
-        T &front();
+        T &top();
 
-        T &pop();
+        void pop();
 
-        uint64_t size();
+        uint32_t size();
+
+        bool empty();
     };
 
     template<class T>
-    uint64_t Stack<T>::size() {
-        return _size;
+    Stack<T>::iterator Stack<T>::end() {
+        return Stack::iterator(_data + _size);
     }
 
     template<class T>
-    Stack<T>::Stack(uint64_t size) {
+    Stack<T>::iterator Stack<T>::begin() {
+        return Stack::iterator(_data);
+    }
+
+    template<class T>
+    bool Stack<T>::empty() {
+        return this->begin() == this->end();
+    }
+
+    template<class T>
+    uint32_t Stack<T>::size() {
+        return std::distance(this->begin(), this->end());
+    }
+
+    template<class T>
+    Stack<T>::Stack(uint32_t size) {
         if (size == 0) {
             return;
         }
@@ -88,7 +156,7 @@ namespace stack {
         _data = new T[other._capacity];
         _capacity = other._capacity;
         _size = other._size;
-        for (uint64_t i = 0; i < other._size; i++) {
+        for (uint32_t i = 0; i < other._size; i++) {
             _data[i] = other._data[i];
         }
     }
@@ -107,7 +175,7 @@ namespace stack {
     template<class T>
     Stack<T> &Stack<T>::push(const T &obj) {
         if (_size == _capacity) {
-            _increase_capacity();
+            _resize(_capacity * 2 + 1);
         }
         _size++;
         _data[_size - 1] = obj;
@@ -117,7 +185,7 @@ namespace stack {
     template<class T>
     Stack<T> &Stack<T>::push(const T &&obj) {
         if (_size == _capacity) {
-            _increase_capacity();
+            _resize(_capacity * 2 + 1);
         }
         _size++;
         _data[_size - 1] = std::move(obj);
@@ -125,10 +193,10 @@ namespace stack {
     }
 
     template<class T>
-    void Stack<T>::_increase_capacity() {
-        _capacity = _capacity * 2 + 1;
+    void Stack<T>::_resize(uint32_t new_size) {
+        _capacity = new_size;
         auto data = new T[_capacity];
-        for (uint64_t i = 0; i < _size; i++) {
+        for (uint32_t i = 0; i < std::min(_size, _capacity); i++) {
             data[i] = std::move(_data[i]);
         }
         delete[] _data;
@@ -136,14 +204,18 @@ namespace stack {
     }
 
     template<class T>
-    T &Stack<T>::front() {
-        assert(_size > 0);
-        return _data[_size - 1];
+    T &Stack<T>::top() {
+        if (empty()) {
+            throw std::runtime_error("Stack is empty");
+        }
+        return *--end();
     }
 
     template<class T>
-    T &Stack<T>::pop() {
-        assert(_size > 0);
-        return _data[_size--];
+    void Stack<T>::pop() {
+        if (not empty()) --_size;
+        if (_size * 2 + 1000 < _capacity) {
+            _resize(_size);
+        }
     }
 }

@@ -8,11 +8,3 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 add_subdirectory("lib")
 add_subdirectory("src")
-
-add_executable(Lol src/main.cpp)
-
-target_link_libraries(Lol PRIVATE Stacker)
-
-target_include_directories(Lol PRIVATE
-    "${PROJECT_SOURCE_DIR}/lib"
-)
