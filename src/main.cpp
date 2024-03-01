@@ -1,5 +1,6 @@
 #include <iostream>
 #include "stack.h"
+#include "parser.h"
 
 int main() {
     stack::Stack<int> a;
