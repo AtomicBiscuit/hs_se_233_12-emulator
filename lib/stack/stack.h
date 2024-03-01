@@ -95,12 +95,12 @@ namespace stack {
     }
 
     template<class T>
-    Stack<T>::iterator Stack<T>::end() {
+    typename Stack<T>::iterator Stack<T>::end() {
         return Stack::iterator(_data + _size);
     }
 
     template<class T>
-    Stack<T>::iterator Stack<T>::begin() {
+    typename Stack<T>::iterator Stack<T>::begin() {
         return Stack::iterator(_data);
     }
 
