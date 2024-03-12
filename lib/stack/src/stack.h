@@ -7,7 +7,6 @@
 #include <stdexcept>
 
 namespace stack {
-
     template<class T>
     class Stack {
     private:

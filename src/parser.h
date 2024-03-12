@@ -2,23 +2,27 @@
 
 #include <string>
 #include <fstream>
+#include <map>
+#include "commands.h"
 
-namespace parser {
-    class Parser {
-    public:
-        constexpr static uint32_t LINE_MAX_SIZE = 1000;
+class Parser {
+public:
+    constexpr static uint32_t LINE_MAX_SIZE = 120;
 
-        Parser() = delete;
+    Parser() = delete;
 
-        explicit Parser(const std::string &);
+    explicit Parser(const std::string &);
 
-        bool check_opened();
+    bool check_opened();
 
-        void parse();
+    void parse();
 
-        ~Parser();
-
-    private:
-        std::ifstream file;
+private:
+    static inline std::map<std::string, BaseCommand *> commands = {
+            {"BEGIN", &Begin::instance()},
+            {"END",   &End::instance()},
+            {"PUSH", &Push::instance()},
+            {"POP",  &Pop::instance()}
     };
-}
+    std::ifstream file;
+};

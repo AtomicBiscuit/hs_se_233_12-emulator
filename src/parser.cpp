@@ -1,16 +1,17 @@
 #include <string>
 #include <fstream>
 #include "parser.h"
+#include "commands.h"
 
-parser::Parser::Parser(const std::string &a) {
+Parser::Parser(const std::string &a) {
     this->file.open(a);
 }
 
-bool parser::Parser::check_opened() {
+bool Parser::check_opened() {
     return this->file.is_open();
 }
 
-void parser::Parser::parse() {
+void Parser::parse() {
     if (not this->file.is_open()) {
         throw std::runtime_error("File is closed");
     }
