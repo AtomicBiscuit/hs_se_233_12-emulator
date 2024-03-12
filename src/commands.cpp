@@ -190,7 +190,7 @@ void InCommand::configure(std::string param, int line, shared_stack stack) {
 }
 
 int OutCommand::run(std::string param, int line) {
-    std::cout << stack_->data.top();
+    std::cout << stack_->data.top() << std::endl;
     stack_->data.pop();
     return line + 1;
 }

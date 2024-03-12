@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
         for (auto [command, param]: program) {
             try {
                 command->configure(param, line, stack);
-            }catch(InvalidArgumentException& e){
+            } catch (InvalidArgumentException &e) {
                 throw InvalidArgumentException(e.what(), line + 1);
             }
             line++;
@@ -30,7 +30,9 @@ int main(int argc, char *argv[]) {
             auto [command, param] = program[line];
             try {
                 line = command->run(param, line);
-            }catch(InvalidArgumentException& e){
+            } catch (InvalidArgumentException &e) {
+                throw InvalidArgumentException(e.what(), line + 1);
+            } catch (std::runtime_error &e) {
                 throw InvalidArgumentException(e.what(), line + 1);
             }
         }
@@ -38,8 +40,8 @@ int main(int argc, char *argv[]) {
         cout << "Error in line " << e.line() << ": " << e.what() << endl;
     } catch (UniqueException &e) {
         cout << "Error in line " << e.line() << ": " << e.what() << endl;
-    } catch (std::out_of_range &e) {
-        cout << "Compilation error" << ": " << e.what() << endl;
+    } catch (runtime_error &e) {
+        cout << "Error: " << e.what() << endl;
     }
     return 0;
 }

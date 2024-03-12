@@ -1,0 +1,67 @@
+next:
+    pushr ax
+    pushr bx
+    add
+    pushr ax
+    popr bx
+    popr ax
+    pushr ax
+    out
+    ret
+
+beg
+    push 1
+    push 1
+
+	popr ax
+	popr bx
+
+    pushr ax
+    pushr bx
+
+    out
+    out
+
+    // Условных переходов пока нет, ждём следующего обновления
+	call next
+	call next
+	call next
+	call next
+	call next
+	call next
+	call next
+	call next
+	call next
+	call next
+
+	call next
+    call next
+    call next
+    call next
+    call next
+    call next
+    call next
+    call next
+    call next
+    call next
+
+    call next
+    call next
+    call next
+    call next
+    call next
+    call next
+    call next
+    call next
+    call next
+    call next
+
+    call next
+    call next
+    call next
+    call next
+    call next
+    call next
+    call next
+    call next
+end
