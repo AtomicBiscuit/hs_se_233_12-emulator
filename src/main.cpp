@@ -1,5 +1,4 @@
 #include <iostream>
-#include "stack.h"
 #include "commands.h"
 #include "parser.h"
 #include "exc.h"

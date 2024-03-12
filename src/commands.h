@@ -2,11 +2,8 @@
 
 #include <utility>
 #include <vector>
-#include <variant>
 #include <string>
-#include <stdexcept>
 #include <memory>
-#include <map>
 
 #include "stack.h"
 #include "data.h"
