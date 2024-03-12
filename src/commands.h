@@ -12,7 +12,7 @@
 #include "data.h"
 
 
-using shared_stack = std::shared_ptr<stack::Stack<int>>;
+using shared_stack = std::shared_ptr<CommandStack>;
 
 template<typename T>
 class Singleton {
@@ -38,65 +38,45 @@ private:
 
 class BaseCommand {
 public:
-    virtual int run(std::string param, int line) = 0;
+    virtual int run(std::string, int) = 0;
 
-    virtual void configure(std::string param, int line, shared_stack stack) = 0;
+    virtual void configure(std::string, int, shared_stack) = 0;
 };
 
 class BaseIntegerCommand : public BaseCommand {
 private:
-    static int clear_param(std::string &param) {
-        try {
-            return std::stoi(param);
-        } catch (std::out_of_range &e) {
-            throw std::invalid_argument(e.what());
-        }
-    }
+    static int clear_param(std::string &, int);
 
 public:
-    virtual int process(int val, int line) = 0;
+    virtual int process(int, int) = 0;
 
-    virtual void setup(int val, int line, shared_stack stack) = 0;
+    virtual void setup(int, int, shared_stack) = 0;
 
-    int run(std::string param, int line) override {
-        int value = clear_param(param);
-        return process(value, line);
-    }
+    int run(std::string, int) override;
 
-    void configure(std::string param, int line, shared_stack stack) override {
-        int value = clear_param(param);
-        setup(value, line, stack);
-    }
+    void configure(std::string, int, shared_stack) override;
 };
 
 class BaseRegisterCommand : public BaseCommand {
 public:
-    virtual int process(RegisterType &val, int line) = 0;
+    virtual int process(RegisterType &, int) = 0;
 
-    virtual void setup(RegisterType &val, int line, shared_stack stack) = 0;
+    virtual void setup(RegisterType &, int, shared_stack) = 0;
 
-    int run(std::string param, int line) override {
-        return process(RegisterType::get(param), line);
-    }
+    int run(std::string, int) override;
 
-    void configure(std::string param, int line, shared_stack stack) override {
-        setup(RegisterType::get(param), line, stack);
-    }
+    void configure(std::string, int, shared_stack) override;
 };
 
 class BaseLabelCommand : public BaseCommand {
 public:
-    virtual int process(LabelType &val, int line) = 0;
+    virtual int process(LabelType &, int) = 0;
 
-    virtual void setup(LabelType &val, int line, shared_stack stack) = 0;
+    virtual void setup(LabelType &, int, shared_stack) = 0;
 
-    int run(std::string param, int line) override {
-        return process(LabelType::get(param), line);
-    }
+    int run(std::string, int) override;
 
-    void configure(std::string param, int line, shared_stack stack) override {
-        setup(LabelType::get(param), line, stack);
-    }
+    void configure(std::string, int, shared_stack) override;
 };
 
 class BeginCommand : public BaseCommand {
@@ -104,246 +84,154 @@ private:
     int line_ = -1;
 public:
 
-    int run(std::string param, int line) override {
-        return line + 1;
-    }
+    int run(std::string, int) override;
 
-    void configure(std::string param, int line, shared_stack stack) override {
-        if (not param.empty()) {
-            throw std::invalid_argument("BEGIN command does not take any arguments");
-        }
-        if (line_ != -1) {
-            throw std::logic_error("BEGIN command must appear only once");
-        }
-        line_ = line;
-    }
+    void configure(std::string, int, shared_stack) override;
+
+    int get_line() const { return line_; }
 };
 
 class EndCommand : public BaseCommand {
 private:
     int line_ = -1;
 public:
-    int run(std::string param, int line) override {
-        return line + 1;
-    }
+    int run(std::string, int) override;
 
-    void configure(std::string param, int line, shared_stack stack) override {
-        if (not param.empty()) {
-            throw std::invalid_argument("END command does not take any arguments");
-        }
-        if (line_ != -1) {
-            throw std::logic_error("END command must appear only once");
-        }
-        line_ = line;
-    }
+    void configure(std::string, int, shared_stack) override;
 };
 
 class PushCommand : public BaseIntegerCommand {
 private:
     shared_stack stack_;
 public:
-    int process(int val, int line) override {
-        stack_->push(val);
-        return line + 1;
-    }
+    int process(int, int) override;
 
-    void setup(int val, int line, shared_stack stack) override {
-        stack_ = std::move(stack);
-    }
+    void setup(int, int, shared_stack) override;
 };
 
 class PopCommand : public BaseCommand {
 private:
     shared_stack stack_;
 public:
-    int run(std::string param, int line) override {
-        stack_->pop();
-        return line + 1;
-    }
+    int run(std::string, int) override;
 
-    void configure(std::string param, int _line, shared_stack stack) override {
-        if (not param.empty()) {
-            throw std::invalid_argument("POP command does not take any arguments");
-        }
-        stack_ = std::move(stack);
-    }
+    void configure(std::string, int, shared_stack) override;
 };
 
 class PushRCommand : public BaseRegisterCommand {
 private:
     shared_stack stack_;
 public:
-    int process(RegisterType &val, int line) override {
-        stack_->push(val.value());
-        return line + 1;
-    }
+    int process(RegisterType &, int) override;
 
-    void setup(RegisterType &val, int line, shared_stack stack) override {
-        stack_ = std::move(stack);
-    }
+    void setup(RegisterType &, int, shared_stack) override;
 };
 
 class PopRCommand : public BaseRegisterCommand {
 private:
     shared_stack stack_;
 public:
-    int process(RegisterType &val, int line) override {
-        val.value() = stack_->top();
-        stack_->pop();
-        return line + 1;
-    }
+    int process(RegisterType &, int) override;
 
-    void setup(RegisterType &val, int line, shared_stack stack) override {
-        stack_ = std::move(stack);
-    }
+    void setup(RegisterType &, int, shared_stack) override;
 };
 
 class AddCommand : public BaseCommand {
 private:
     shared_stack stack_;
 public:
-    int run(std::string param, int line) override {
-        int first = stack_->top();
-        stack_->pop();
-        int second = stack_->top();
-        stack_->pop();
-        stack_->push(first + second);
-        return line + 1;
-    }
+    int run(std::string, int) override;
 
-    void configure(std::string param, int _line, shared_stack stack) override {
-        if (not param.empty()) {
-            throw std::invalid_argument("ADD command does not take any arguments");
-        }
-        stack_ = std::move(stack);
-    }
+    void configure(std::string, int, shared_stack) override;
 };
 
 class SubCommand : public BaseCommand {
 private:
     shared_stack stack_;
 public:
-    int run(std::string param, int line) override {
-        int first = stack_->top();
-        stack_->pop();
-        int second = stack_->top();
-        stack_->pop();
-        stack_->push(first - second);
-        return line + 1;
-    }
+    int run(std::string, int) override;
 
-    void configure(std::string param, int _line, shared_stack stack) override {
-        if (not param.empty()) {
-            throw std::invalid_argument("SUB command does not take any arguments");
-        }
-        stack_ = std::move(stack);
-    }
+    void configure(std::string, int, shared_stack) override;
 };
 
 class MulCommand : public BaseCommand {
 private:
     shared_stack stack_;
 public:
-    int run(std::string param, int line) override {
-        int first = stack_->top();
-        stack_->pop();
-        int second = stack_->top();
-        stack_->pop();
-        stack_->push(first * second);
-        return line + 1;
-    }
+    int run(std::string, int) override;
 
-    void configure(std::string param, int _line, shared_stack stack) override {
-        if (not param.empty()) {
-            throw std::invalid_argument("MUL command does not take any arguments");
-        }
-        stack_ = std::move(stack);
-    }
+    void configure(std::string, int, shared_stack) override;
 };
 
 class DivCommand : public BaseCommand {
 private:
     shared_stack stack_;
 public:
-    int run(std::string param, int line) override {
-        int first = stack_->top();
-        stack_->pop();
-        int second = stack_->top();
-        stack_->pop();
-        stack_->push(first / second);
-        return line + 1;
-    }
+    int run(std::string, int) override;
 
-    void configure(std::string param, int _line, shared_stack stack) override {
-        if (not param.empty()) {
-            throw std::invalid_argument("DIV command does not take any arguments");
-        }
-        stack_ = std::move(stack);
-    }
+    void configure(std::string, int, shared_stack) override;
 };
 
 class InCommand : public BaseCommand {
 private:
     shared_stack stack_;
 public:
-    int run(std::string param, int line) override {
-        int value;
-        std::cout << "Input number: ";
-        std::cin >> value;
-        std::cout << std::endl;
-        stack_->push(value);
-        return line + 1;
-    }
+    int run(std::string, int) override;
 
-    void configure(std::string param, int _line, shared_stack stack) override {
-        if (not param.empty()) {
-            throw std::invalid_argument("IN command does not take any arguments");
-        }
-        stack_ = std::move(stack);
-    }
+    void configure(std::string, int, shared_stack) override;
 };
 
 class OutCommand : public BaseCommand {
 private:
     shared_stack stack_;
 public:
-    int run(std::string param, int line) override {
-        std::cout << stack_->top();
-        stack_->pop();
-        return line + 1;
-    }
+    int run(std::string, int) override;
 
-    void configure(std::string param, int _line, shared_stack stack) override {
-        if (not param.empty()) {
-            throw std::invalid_argument("OUT command does not take any arguments");
-        }
-        stack_ = std::move(stack);
-    }
+    void configure(std::string, int, shared_stack) override;
 };
 
 class LabelCommand : public BaseLabelCommand {
 private:
 public:
-    int process(LabelType &val, int line) override {
-        return line + 1;
-    }
+    int process(LabelType &, int) override;
 
-    void setup(LabelType &val, int line, shared_stack stack) override {
-        val.line() = line;
-    }
+    void setup(LabelType &, int, shared_stack) override;
 };
 
 class JumpCommand : public BaseLabelCommand {
 private:
 public:
-    int process(LabelType &val, int line) override {
-        if (val.line() == -1) {
-            throw std::invalid_argument("Can not find label to jump");
-        }
-        return val.line();
-    }
+    int process(LabelType &, int) override;
 
-    void setup(LabelType &val, int line, shared_stack stack) override {}
+    void setup(LabelType &, int, shared_stack) override;
+};
+
+
+class CallCommand : public BaseLabelCommand {
+private:
+    shared_stack stack_;
+public:
+    int process(LabelType &, int) override;
+
+    void setup(LabelType &, int, shared_stack) override;
+};
+
+class RetCommand : public BaseCommand {
+private:
+    shared_stack stack_;
+public:
+    int run(std::string, int) override;
+
+    void configure(std::string, int, shared_stack) override;
+};
+
+class BlankCommand : public BaseCommand {
+private:
+    shared_stack stack_;
+public:
+    int run(std::string, int line) override { return line + 1; }
+
+    void configure(std::string, int, shared_stack) override {}
 };
 
 
@@ -361,3 +249,9 @@ using In = Singleton<InCommand>;
 using Out = Singleton<OutCommand>;
 using Label = Singleton<LabelCommand>;
 using Jump = Singleton<JumpCommand>;
+
+
+using Call = Singleton<CallCommand>;
+using Ret = Singleton<RetCommand>;
+
+using Blank = Singleton<BlankCommand>;

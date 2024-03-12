@@ -1,0 +1,1 @@
+add_library(Exceptions INTERFACE exc.h)

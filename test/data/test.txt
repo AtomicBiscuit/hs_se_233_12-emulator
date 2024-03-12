@@ -1,0 +1,35 @@
+//456468494
+compute:
+	pushr bx
+	pushr bx
+	mul // b^2
+
+	push 4
+	pushr ax
+	pushr cx
+	mul // a * c
+	mul // 4 * (a * c)
+	sub // (b^2) - (4 * (a * c))
+
+	popr ax // записываем вершину стека в ax
+
+	pushr ax
+	push 0
+	jmp return
+
+return:
+	ret // откатывает стек в состояние до вызова
+
+beg
+	in
+	popr ax
+	in
+	popr bx
+	in
+	popr cx
+
+	call compute
+
+	pushr ax
+	out
+end

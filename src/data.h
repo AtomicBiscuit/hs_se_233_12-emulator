@@ -2,7 +2,7 @@
 
 #include <string>
 #include <vector>
-#include <stdexcept>
+#include "exc.h"
 
 class RegisterType {
 private:
@@ -17,7 +17,7 @@ private:
 public:
     static RegisterType &get(const std::string &name) {
         if (std::find(available.begin(), available.end(), name) == available.end()) {
-            throw std::invalid_argument("Incorrect register name");
+            throw InvalidArgumentException("Incorrect register name \"" + name + "\n", -1);
         }
         for (auto &i: regs_) {
             if (i.name_ == name) {
@@ -28,9 +28,9 @@ public:
         return regs_.back();
     }
 
-    int &value() {
-        return value_;
-    }
+    int &value() { return value_; }
+
+    const std::string &name() { return name_; }
 
     const static inline std::vector<std::string> available = {"ax", "bx", "cx", "dx", "ex"};
 };
@@ -50,11 +50,11 @@ public:
 
     static LabelType &get(const std::string &name) {
         if (name.empty() || not isalpha(name.front())) {
-            throw std::invalid_argument("Incorrect label name");
+            throw InvalidArgumentException("Incorrect label name \"" + name + "\"", -1);
         }
         for (auto &i: name) {
             if (not isalnum(i)) {
-                throw std::invalid_argument("Incorrect label name");
+                throw InvalidArgumentException("Incorrect label name \"" + name + "\"", -1);
             }
         }
         for (auto &i: labels_) {
@@ -66,7 +66,13 @@ public:
         return labels_.back();
     }
 
-    int &line() {
-        return line_;
-    }
+    int &line() { return line_; }
+
+    const std::string &name() { return name_; }
+};
+
+class CommandStack {
+public:
+    stack::Stack<int> data;
+    stack::Stack<int> call;
 };

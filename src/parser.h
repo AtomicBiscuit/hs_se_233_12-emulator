@@ -7,22 +7,37 @@
 
 class Parser {
 public:
-    constexpr static uint32_t LINE_MAX_SIZE = 120;
-
     Parser() = delete;
 
     explicit Parser(const std::string &);
 
-    bool check_opened();
-
     void parse();
 
+    std::vector<std::tuple<BaseCommand *, std::string>> get_program();
+
+    std::vector<std::tuple<std::string, std::string>> get_test_program() { return program_; }
+
 private:
-    static inline std::map<std::string, BaseCommand *> commands = {
-            {"BEGIN", &Begin::instance()},
-            {"END",   &End::instance()},
-            {"PUSH", &Push::instance()},
-            {"POP",  &Pop::instance()}
+    std::vector<std::tuple<std::string, std::string>> program_;
+    static inline std::map<std::string, BaseCommand *> commands_ = {
+            {"BEGIN",  &Begin::instance()},
+            {"BEG",    &Begin::instance()},
+            {"END",    &End::instance()},
+            {"PUSH",   &Push::instance()},
+            {"POP",    &Pop::instance()},
+            {"PUSHR",  &PushR::instance()},
+            {"POPR",   &PopR::instance()},
+            {"ADD",    &Add::instance()},
+            {"SUB",    &Sub::instance()},
+            {"MUL",    &Mul::instance()},
+            {"DIV",    &Div::instance()},
+            {"IN",     &In::instance()},
+            {"OUT",    &Out::instance()},
+            {"LABEL",  &Label::instance()},
+            {"JMP",    &Jump::instance()},
+            {"CALL",   &Call::instance()},
+            {"RET",    &Ret::instance()},
+            {"/BLANK", &Blank::instance()}, // Команда, которую пользователь не сможет ввести
     };
     std::ifstream file;
 };
