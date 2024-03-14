@@ -35,9 +35,15 @@ private:
             {"OUT",    &Out::instance()},
             {"LABEL",  &Label::instance()},
             {"JMP",    &Jump::instance()},
+            {"JEQ",    &JumpE::instance()},
+            {"JNE",    &JumpNE::instance()},
+            {"JA",     &JumpG::instance()},
+            {"JAE",    &JumpGE::instance()},
+            {"JB",     &JumpL::instance()},
+            {"JBE",    &JumpLE::instance()},
             {"CALL",   &Call::instance()},
             {"RET",    &Ret::instance()},
-            {"/BLANK", &Blank::instance()}, // Команда, которую пользователь не сможет ввести
+            {"/BLANK", &Blank::instance()}
     };
     std::ifstream file;
 };

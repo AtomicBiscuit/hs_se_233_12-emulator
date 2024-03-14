@@ -9,7 +9,6 @@ int main(int argc, char *argv[]) {
     if (argc != 2) {
         return 0;
     }
-    cout << argv[1] << endl;
     try {
         Parser parser(argv[1]);
         parser.parse();
@@ -39,7 +38,7 @@ int main(int argc, char *argv[]) {
         cout << "Error in line " << e.line() << ": " << e.what() << endl;
     } catch (UniqueException &e) {
         cout << "Error in line " << e.line() << ": " << e.what() << endl;
-    } catch (runtime_error &e) {
+    } catch (std::runtime_error &e) {
         cout << "Error: " << e.what() << endl;
     }
     return 0;

@@ -1,0 +1,37 @@
+next:
+    pushr ax
+    pushr bx
+    add
+    pushr ax
+    popr bx
+    popr ax
+    pushr ax
+    out
+    ret
+
+beg
+    push 0
+    push 1
+
+	popr ax
+	popr bx
+
+    pushr ax
+
+    out
+
+    push 1
+    popr cx
+
+start:
+	call next
+
+	pushr cx
+	push 1
+	add
+	popr cx
+	pushr cx
+	push 40
+
+	ja start
+end

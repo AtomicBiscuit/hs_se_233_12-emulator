@@ -1,0 +1,31 @@
+factor:
+    popr cx
+    pushr cx
+    push 1
+    sub
+
+    push 0
+    ja return
+    pop
+
+    pushr cx
+    pushr ax
+    mul
+    popr ax
+
+    jmp factor
+
+return:
+    ret
+
+beg
+    push 1
+	popr ax
+
+	in
+
+	call factor
+
+	pushr ax
+	out
+end

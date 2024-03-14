@@ -1,0 +1,33 @@
+factor:
+    pushr ax
+    pushr bx
+    mul
+    popr ax
+
+    pushr bx
+    push 1
+    add
+    popr bx
+
+    ret
+
+beg
+    push 1
+    push 1
+
+	popr ax
+	popr bx
+
+	in
+	popr dx
+
+start:
+	call factor
+
+	pushr dx
+	pushr bx
+
+	jbe start
+	pushr ax
+	out
+end

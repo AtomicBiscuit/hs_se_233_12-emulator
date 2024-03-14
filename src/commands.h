@@ -203,6 +203,60 @@ public:
     void setup(LabelType &, int, shared_stack) override;
 };
 
+class JumpEqualCommand : public BaseLabelCommand {
+private:
+    shared_stack stack_;
+public:
+    int process(LabelType &, int) override;
+
+    void setup(LabelType &, int, shared_stack) override;
+};
+
+class JumpNotEqualCommand : public BaseLabelCommand {
+private:
+    shared_stack stack_;
+public:
+    int process(LabelType &, int) override;
+
+    void setup(LabelType &, int, shared_stack) override;
+};
+
+class JumpGreaterCommand : public BaseLabelCommand {
+private:
+    shared_stack stack_;
+public:
+    int process(LabelType &, int) override;
+
+    void setup(LabelType &, int, shared_stack) override;
+};
+
+class JumpGreaterOrEqualCommand : public BaseLabelCommand {
+private:
+    shared_stack stack_;
+public:
+    int process(LabelType &, int) override;
+
+    void setup(LabelType &, int, shared_stack) override;
+};
+
+class JumpLessCommand : public BaseLabelCommand {
+private:
+    shared_stack stack_;
+public:
+    int process(LabelType &, int) override;
+
+    void setup(LabelType &, int, shared_stack) override;
+};
+
+class JumpLessOrEqualCommand : public BaseLabelCommand {
+private:
+    shared_stack stack_;
+public:
+    int process(LabelType &, int) override;
+
+    void setup(LabelType &, int, shared_stack) override;
+};
+
 
 class CallCommand : public BaseLabelCommand {
 private:
@@ -244,9 +298,16 @@ using Mul = Singleton<MulCommand>;
 using Div = Singleton<DivCommand>;
 using In = Singleton<InCommand>;
 using Out = Singleton<OutCommand>;
-using Label = Singleton<LabelCommand>;
-using Jump = Singleton<JumpCommand>;
 
+using Label = Singleton<LabelCommand>;
+
+using Jump = Singleton<JumpCommand>;
+using JumpE = Singleton<JumpEqualCommand>;
+using JumpNE = Singleton<JumpNotEqualCommand>;
+using JumpG = Singleton<JumpGreaterCommand>;
+using JumpGE = Singleton<JumpGreaterOrEqualCommand>;
+using JumpL = Singleton<JumpLessCommand>;
+using JumpLE = Singleton<JumpLessOrEqualCommand>;
 
 using Call = Singleton<CallCommand>;
 using Ret = Singleton<RetCommand>;

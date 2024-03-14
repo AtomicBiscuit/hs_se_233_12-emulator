@@ -219,6 +219,115 @@ int JumpCommand::process(LabelType &val, int line) {
 
 void JumpCommand::setup(LabelType &val, int line, shared_stack stack) {}
 
+int JumpEqualCommand::process(LabelType &val, int line) {
+    int first = stack_->data.top();
+    stack_->data.pop();
+    int second = stack_->data.top();
+    stack_->data.push(first);
+    if (first != second) {
+        return line + 1;
+    }
+    if (val.line() == -1) {
+        throw InvalidArgumentException("Can not find label \"" + val.name() + "\" to jump");
+    }
+    return val.line();
+}
+
+void JumpEqualCommand::setup(LabelType &val, int line, shared_stack stack) {
+    stack_ = std::move(stack);
+}
+
+int JumpNotEqualCommand::process(LabelType &val, int line) {
+    int first = stack_->data.top();
+    stack_->data.pop();
+    int second = stack_->data.top();
+    stack_->data.push(first);
+    if (first == second) {
+        return line + 1;
+    }
+    if (val.line() == -1) {
+        throw InvalidArgumentException("Can not find label \"" + val.name() + "\" to jump");
+    }
+    return val.line();
+}
+
+void JumpNotEqualCommand::setup(LabelType &val, int line, shared_stack stack) {
+    stack_ = std::move(stack);
+}
+
+int JumpGreaterCommand::process(LabelType &val, int line) {
+    int first = stack_->data.top();
+    stack_->data.pop();
+    int second = stack_->data.top();
+    stack_->data.push(first);
+    if (first <= second) {
+        return line + 1;
+    }
+    if (val.line() == -1) {
+        throw InvalidArgumentException("Can not find label \"" + val.name() + "\" to jump");
+    }
+    return val.line();
+}
+
+void JumpGreaterCommand::setup(LabelType &val, int line, shared_stack stack) {
+    stack_ = std::move(stack);
+}
+
+int JumpGreaterOrEqualCommand::process(LabelType &val, int line) {
+    int first = stack_->data.top();
+    stack_->data.pop();
+    int second = stack_->data.top();
+    stack_->data.push(first);
+    if (first < second) {
+        return line + 1;
+    }
+    if (val.line() == -1) {
+        throw InvalidArgumentException("Can not find label \"" + val.name() + "\" to jump");
+    }
+    return val.line();
+}
+
+void JumpGreaterOrEqualCommand::setup(LabelType &val, int line, shared_stack stack) {
+    stack_ = std::move(stack);
+}
+
+int JumpLessCommand::process(LabelType &val, int line) {
+    int first = stack_->data.top();
+    stack_->data.pop();
+    int second = stack_->data.top();
+    stack_->data.push(first);
+    if (first >= second) {
+        return line + 1;
+    }
+    if (val.line() == -1) {
+        throw InvalidArgumentException("Can not find label \"" + val.name() + "\" to jump");
+    }
+    return val.line();
+}
+
+void JumpLessCommand::setup(LabelType &val, int line, shared_stack stack) {
+    stack_ = std::move(stack);
+}
+
+int JumpLessOrEqualCommand::process(LabelType &val, int line) {
+    int first = stack_->data.top();
+    stack_->data.pop();
+    int second = stack_->data.top();
+    stack_->data.push(first);
+    if (first > second) {
+        return line + 1;
+    }
+    if (val.line() == -1) {
+        throw InvalidArgumentException("Can not find label \"" + val.name() + "\" to jump");
+    }
+    return val.line();
+}
+
+void JumpLessOrEqualCommand::setup(LabelType &val, int line, shared_stack stack) {
+    stack_ = std::move(stack);
+}
+
+
 int CallCommand::process(LabelType &val, int line) {
     if (val.line() == -1) {
         throw InvalidArgumentException("Can not find label \"" + val.name() + "\" to jump");
