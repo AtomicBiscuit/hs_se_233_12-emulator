@@ -15,9 +15,8 @@ public:
 
     std::vector<std::tuple<BaseCommand &, std::string>> get_program();
 
-    std::vector<std::tuple<std::string, std::string>> get_test_program() { return program_; }
-
 private:
+    std::ifstream file_;
     std::vector<std::tuple<std::string, std::string>> program_;
     static inline std::map<std::string, BaseCommand &> commands_ = {
             {"BEGIN",  Begin::instance()},
@@ -45,5 +44,4 @@ private:
             {"RET",    Ret::instance()},
             {"/BLANK", Blank::instance()}
     };
-    std::ifstream file;
 };

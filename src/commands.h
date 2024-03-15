@@ -40,6 +40,20 @@ public:
     virtual void configure(std::string, int, shared_stack) = 0;
 };
 
+class BaseParamLessCommand : public BaseCommand {
+private:
+    virtual std::string name() = 0;
+
+public:
+    virtual int process(int) = 0;
+
+    virtual void setup(int, shared_stack) = 0;
+
+    int run(std::string, int) override;
+
+    void configure(std::string, int, shared_stack) override;
+};
+
 class BaseIntegerCommand : public BaseCommand {
 private:
     static int clear_param(std::string &, int);
@@ -76,25 +90,29 @@ public:
     void configure(std::string, int, shared_stack) override;
 };
 
-class BeginCommand : public BaseCommand {
+class BeginCommand : public BaseParamLessCommand {
 private:
+    std::string name() override { return "BEGIN"; }
+
     int line_ = -1;
 public:
 
-    int run(std::string, int) override;
+    int process(int) override;
 
-    void configure(std::string, int, shared_stack) override;
+    void setup(int, shared_stack) override;
 
     int get_line() const { return line_; }
 };
 
-class EndCommand : public BaseCommand {
+class EndCommand : public BaseParamLessCommand {
 private:
+    std::string name() override { return "END"; }
+
     int line_ = -1;
 public:
-    int run(std::string, int) override;
+    int process(int) override;
 
-    void configure(std::string, int, shared_stack) override;
+    void setup(int, shared_stack) override;
 };
 
 class PushCommand : public BaseIntegerCommand {
@@ -106,13 +124,15 @@ public:
     void setup(int, int, shared_stack) override;
 };
 
-class PopCommand : public BaseCommand {
+class PopCommand : public BaseParamLessCommand {
 private:
+    std::string name() override { return "POP"; }
+
     shared_stack stack_;
 public:
-    int run(std::string, int) override;
+    int process(int) override;
 
-    void configure(std::string, int, shared_stack) override;
+    void setup(int, shared_stack) override;
 };
 
 class PushRCommand : public BaseRegisterCommand {
@@ -133,58 +153,70 @@ public:
     void setup(RegisterType &, int, shared_stack) override;
 };
 
-class AddCommand : public BaseCommand {
+class AddCommand : public BaseParamLessCommand {
 private:
+    std::string name() override { return "ADD"; }
+
     shared_stack stack_;
 public:
-    int run(std::string, int) override;
+    int process(int) override;
 
-    void configure(std::string, int, shared_stack) override;
+    void setup(int, shared_stack) override;
 };
 
-class SubCommand : public BaseCommand {
+class SubCommand : public BaseParamLessCommand {
 private:
+    std::string name() override { return "SUB"; }
+
     shared_stack stack_;
 public:
-    int run(std::string, int) override;
+    int process(int) override;
 
-    void configure(std::string, int, shared_stack) override;
+    void setup(int, shared_stack) override;
 };
 
-class MulCommand : public BaseCommand {
+class MulCommand : public BaseParamLessCommand {
 private:
+    std::string name() override { return "MUL"; }
+
     shared_stack stack_;
 public:
-    int run(std::string, int) override;
+    int process(int) override;
 
-    void configure(std::string, int, shared_stack) override;
+    void setup(int, shared_stack) override;
 };
 
-class DivCommand : public BaseCommand {
+class DivCommand : public BaseParamLessCommand {
 private:
+    std::string name() override { return "DIV"; }
+
     shared_stack stack_;
 public:
-    int run(std::string, int) override;
+    int process(int) override;
 
-    void configure(std::string, int, shared_stack) override;
+    void setup(int, shared_stack) override;
 };
 
-class InCommand : public BaseCommand {
+class InCommand : public BaseParamLessCommand {
 private:
+    std::string name() override { return "IN"; }
+
     shared_stack stack_;
 public:
-    int run(std::string, int) override;
+    int process(int) override;
 
-    void configure(std::string, int, shared_stack) override;
+    void setup(int, shared_stack) override;
 };
 
-class OutCommand : public BaseCommand {
+class OutCommand : public BaseParamLessCommand {
 private:
+    std::string name() override { return "OUT"; }
+
     shared_stack stack_;
 public:
-    int run(std::string, int) override;
+    int process(int) override;
 
-    void configure(std::string, int, shared_stack) override;
+    void setup(int, shared_stack) override;
 };
 
 class LabelCommand : public BaseLabelCommand {
@@ -267,13 +299,15 @@ public:
     void setup(LabelType &, int, shared_stack) override;
 };
 
-class RetCommand : public BaseCommand {
+class RetCommand : public BaseParamLessCommand {
 private:
+    std::string name() override { return "RET"; }
+
     shared_stack stack_;
 public:
-    int run(std::string, int) override;
+    int process(int) override;
 
-    void configure(std::string, int, shared_stack) override;
+    void setup(int, shared_stack) override;
 };
 
 class BlankCommand : public BaseCommand {

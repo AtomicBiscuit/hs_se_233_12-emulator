@@ -5,21 +5,21 @@
 #include "exc.h"
 
 Parser::Parser(const std::string &a) {
-    this->file.open(a);
+    this->file_.open(a);
 }
 
 void Parser::parse() {
-    if (not this->file.is_open()) {
+    if (not this->file_.is_open()) {
         throw std::runtime_error("File is closed");
     }
     std::string line;
     std::string command;
     std::string param;
     int line_number = 1;
-    while (not this->file.eof()) {
+    while (not this->file_.eof()) {
         command.clear();
         param.clear();
-        std::getline(this->file, line);
+        std::getline(this->file_, line);
         std::stringstream line_stream(line);
         line_stream >> command;
         if (command.empty() || command.starts_with('/')) {

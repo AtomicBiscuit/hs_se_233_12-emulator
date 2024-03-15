@@ -1,6 +1,18 @@
 #include "commands.h"
 #include "exc.h"
 
+int BaseParamLessCommand::run(std::string param, int line) {
+    return process(line);
+}
+
+void BaseParamLessCommand::configure(std::string param, int line, shared_stack stack) {
+    if (not param.empty()) {
+        throw InvalidArgumentException(name() + " command does not take any arguments");
+    }
+    setup(line, stack);
+}
+
+
 int BaseIntegerCommand::clear_param(std::string &param, int line) {
     try {
         return std::stoi(param);
@@ -37,29 +49,22 @@ void BaseLabelCommand::configure(std::string param, int line, shared_stack stack
     setup(LabelType::get(param), line, stack);
 }
 
-
-int BeginCommand::run(std::string param, int line) {
+int BeginCommand::process(int line) {
     return line + 1;
 }
 
-void BeginCommand::configure(std::string param, int line, shared_stack stack) {
-    if (not param.empty()) {
-        throw InvalidArgumentException("BEGIN command does not take any arguments");
-    }
+void BeginCommand::setup(int line, shared_stack stack) {
     if (line_ != -1) {
         throw UniqueException("BEGIN command must appear only once", line);
     }
     line_ = line;
 }
 
-int EndCommand::run(std::string param, int line) {
+int EndCommand::process(int line) {
     return -1;
 }
 
-void EndCommand::configure(std::string param, int line, shared_stack stack) {
-    if (not param.empty()) {
-        throw InvalidArgumentException("END command does not take any arguments");
-    }
+void EndCommand::setup(int line, shared_stack stack) {
     if (line_ != -1) {
         throw UniqueException("END command must appear only once", line);
     }
@@ -77,15 +82,12 @@ void PushCommand::setup(int val, int line, shared_stack stack) {
 }
 
 
-int PopCommand::run(std::string param, int line) {
+int PopCommand::process(int line) {
     stack_->data.pop();
     return line + 1;
 }
 
-void PopCommand::configure(std::string param, int line, shared_stack stack) {
-    if (not param.empty()) {
-        throw InvalidArgumentException("POP command does not take any arguments");
-    }
+void PopCommand::setup(int line, shared_stack stack) {
     stack_ = std::move(stack);
 }
 
@@ -110,7 +112,7 @@ void PopRCommand::setup(RegisterType &val, int line, shared_stack stack) {
     stack_ = std::move(stack);
 }
 
-int AddCommand::run(std::string param, int line) {
+int AddCommand::process(int line) {
     int first = stack_->data.top();
     stack_->data.pop();
     int second = stack_->data.top();
@@ -119,14 +121,11 @@ int AddCommand::run(std::string param, int line) {
     return line + 1;
 }
 
-void AddCommand::configure(std::string param, int line, shared_stack stack) {
-    if (not param.empty()) {
-        throw InvalidArgumentException("ADD command does not take any arguments");
-    }
+void AddCommand::setup(int line, shared_stack stack) {
     stack_ = std::move(stack);
 }
 
-int SubCommand::run(std::string param, int line) {
+int SubCommand::process(int line) {
     int first = stack_->data.top();
     stack_->data.pop();
     int second = stack_->data.top();
@@ -135,14 +134,11 @@ int SubCommand::run(std::string param, int line) {
     return line + 1;
 }
 
-void SubCommand::configure(std::string param, int line, shared_stack stack) {
-    if (not param.empty()) {
-        throw InvalidArgumentException("SUB command does not take any arguments");
-    }
+void SubCommand::setup(int line, shared_stack stack) {
     stack_ = std::move(stack);
 }
 
-int MulCommand::run(std::string param, int line) {
+int MulCommand::process(int line) {
     int first = stack_->data.top();
     stack_->data.pop();
     int second = stack_->data.top();
@@ -151,14 +147,11 @@ int MulCommand::run(std::string param, int line) {
     return line + 1;
 }
 
-void MulCommand::configure(std::string param, int line, shared_stack stack) {
-    if (not param.empty()) {
-        throw InvalidArgumentException("MUL command does not take any arguments", line);
-    }
+void MulCommand::setup(int line, shared_stack stack) {
     stack_ = std::move(stack);
 }
 
-int DivCommand::run(std::string param, int line) {
+int DivCommand::process(int line) {
     int first = stack_->data.top();
     stack_->data.pop();
     int second = stack_->data.top();
@@ -167,14 +160,11 @@ int DivCommand::run(std::string param, int line) {
     return line + 1;
 }
 
-void DivCommand::configure(std::string param, int line, shared_stack stack) {
-    if (not param.empty()) {
-        throw InvalidArgumentException("DIV command does not take any arguments");
-    }
+void DivCommand::setup(int line, shared_stack stack) {
     stack_ = std::move(stack);
 }
 
-int InCommand::run(std::string param, int line) {
+int InCommand::process(int line) {
     int value;
     std::cout << "Input number: ";
     std::cin >> value;
@@ -182,23 +172,17 @@ int InCommand::run(std::string param, int line) {
     return line + 1;
 }
 
-void InCommand::configure(std::string param, int line, shared_stack stack) {
-    if (not param.empty()) {
-        throw InvalidArgumentException("IN command does not take any arguments");
-    }
+void InCommand::setup(int line, shared_stack stack) {
     stack_ = std::move(stack);
 }
 
-int OutCommand::run(std::string param, int line) {
+int OutCommand::process(int line) {
     std::cout << stack_->data.top() << std::endl;
     stack_->data.pop();
     return line + 1;
 }
 
-void OutCommand::configure(std::string param, int line, shared_stack stack) {
-    if (not param.empty()) {
-        throw InvalidArgumentException("OUT command does not take any arguments");
-    }
+void OutCommand::setup(int line, shared_stack stack) {
     stack_ = std::move(stack);
 }
 
@@ -340,15 +324,12 @@ void CallCommand::setup(LabelType &val, int line, shared_stack stack) {
     stack_ = std::move(stack);
 }
 
-int RetCommand::run(std::string param, int line) {
+int RetCommand::process(int line) {
     int to = stack_->call.top();
     stack_->call.pop();
     return to + 1;
 }
 
-void RetCommand::configure(std::string param, int line, shared_stack stack) {
-    if (not param.empty()) {
-        throw InvalidArgumentException("IN command does not take any arguments");
-    }
+void RetCommand::setup(int line, shared_stack stack) {
     stack_ = std::move(stack);
 }

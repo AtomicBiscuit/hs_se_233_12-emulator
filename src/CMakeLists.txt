@@ -22,4 +22,6 @@ target_link_libraries(Main PUBLIC Parser)
 
 add_custom_target(Fibonachi Main "./../../test/data/fibonachi.txt")
 
+add_custom_target(FibonachiCycle Main "./../../test/data/fibonachi_1.txt")
+
 add_custom_target(B_kvagrat_minus_4AC Main "./../../test/data/test.txt")
