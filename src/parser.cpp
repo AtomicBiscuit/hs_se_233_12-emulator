@@ -1,6 +1,5 @@
 #include <string>
 #include <sstream>
-#include <fstream>
 #include "parser.h"
 #include "commands.h"
 #include "exc.h"
@@ -48,15 +47,15 @@ void Parser::parse() {
     }
 }
 
-std::vector<std::tuple<BaseCommand *, std::string>> Parser::get_program() {
-    std::vector<std::tuple<BaseCommand *, std::string>> program{};
+std::vector<std::tuple<BaseCommand &, std::string>> Parser::get_program() {
+    std::vector<std::tuple<BaseCommand &, std::string>> program{};
     program.reserve(program_.size());
     int line = 1;
     for (auto [comma, param]: program_) {
         if (not commands_.contains(comma)) {
             throw InvalidArgumentException("Unknown command \"" + comma + "\"", line);
         }
-        program.emplace_back(commands_[comma], param);
+        program.emplace_back(commands_.at(comma), param);
         line++;
     }
     return program;

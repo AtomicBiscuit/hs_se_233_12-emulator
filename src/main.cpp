@@ -12,12 +12,12 @@ int main(int argc, char *argv[]) {
     try {
         Parser parser(argv[1]);
         parser.parse();
-        std::vector<std::tuple<BaseCommand *, std::string>> program = parser.get_program();
+        std::vector<std::tuple<BaseCommand &, std::string>> program = parser.get_program();
         shared_ptr<CommandStack> stack(new CommandStack());
         int line = 0;
         for (auto [command, param]: program) {
             try {
-                command->configure(param, line, stack);
+                command.configure(param, line, stack);
             } catch (InvalidArgumentException &e) {
                 throw InvalidArgumentException(e.what(), line + 1);
             }
@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
         while (-1 < line && line < program.size()) {
             auto [command, param] = program[line];
             try {
-                line = command->run(param, line);
+                line = command.run(param, line);
             } catch (InvalidArgumentException &e) {
                 throw InvalidArgumentException(e.what(), line + 1);
             } catch (std::runtime_error &e) {
