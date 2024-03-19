@@ -158,8 +158,7 @@ TEST(Stack, push_move) {
 TEST(Stack, pop_empty) {
     Stack<uint32_t> a;
     EXPECT_TRUE(a.empty());
-    a.pop();
-    EXPECT_TRUE(a.empty());
+    EXPECT_THROW(a.pop(), std::runtime_error);
 }
 
 TEST(Stack, pop) {

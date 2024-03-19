@@ -4,6 +4,7 @@
 #include <vector>
 #include "exc.h"
 
+
 class RegisterType {
 private:
     std::string name_;
@@ -17,7 +18,7 @@ private:
 public:
     static RegisterType &get(const std::string &name) {
         if (std::find(available.begin(), available.end(), name) == available.end()) {
-            throw InvalidArgumentException("Incorrect register name \"" + name + "\n", -1);
+            throw InvalidArgumentException("Incorrect register name \"" + name + "\"");
         }
         for (auto &i: regs_) {
             if (i.name_ == name) {
@@ -49,12 +50,13 @@ public:
     LabelType(const LabelType &other) = default;
 
     static LabelType &get(const std::string &name) {
+
         if (name.empty() || not isalpha(name.front())) {
-            throw InvalidArgumentException("Incorrect label name \"" + name + "\"", -1);
+            throw InvalidArgumentException("Incorrect label name \"" + name + "\"");
         }
         for (auto &i: name) {
             if (not isalnum(i)) {
-                throw InvalidArgumentException("Incorrect label name \"" + name + "\"", -1);
+                throw InvalidArgumentException("Incorrect label name \"" + name + "\"");
             }
         }
         for (auto &i: labels_) {

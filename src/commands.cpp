@@ -1,15 +1,15 @@
 #include "commands.h"
 #include "exc.h"
 
-int BaseParamLessCommand::run(std::string param, int line) {
-    return process(line);
+int BaseParamLessCommand::run(std::string param, int line, shared_stack stack) {
+    return process(line, stack);
 }
 
-void BaseParamLessCommand::configure(std::string param, int line, shared_stack stack) {
+void BaseParamLessCommand::configure(std::string param, int line) {
     if (not param.empty()) {
-        throw InvalidArgumentException(name() + " command does not take any arguments");
+        throw InvalidArgumentException(command_name.at(name()) + " command does not take any arguments");
     }
-    setup(line, stack);
+    setup(line);
 }
 
 
@@ -21,50 +21,50 @@ int BaseIntegerCommand::clear_param(std::string &param, int line) {
     }
 }
 
-int BaseIntegerCommand::run(std::string param, int line) {
+int BaseIntegerCommand::run(std::string param, int line, shared_stack stack) {
     int value = clear_param(param, line);
-    return process(value, line);
+    return process(value, line, stack);
 }
 
-void BaseIntegerCommand::configure(std::string param, int line, shared_stack stack) {
+void BaseIntegerCommand::configure(std::string param, int line) {
     int value = clear_param(param, line);
-    setup(value, line, stack);
+    setup(value, line);
 }
 
 
-int BaseRegisterCommand::run(std::string param, int line) {
-    return process(RegisterType::get(param), line);
+int BaseRegisterCommand::run(std::string param, int line, shared_stack stack) {
+    return process(RegisterType::get(param), line, stack);
 }
 
-void BaseRegisterCommand::configure(std::string param, int line, shared_stack stack) {
-    setup(RegisterType::get(param), line, stack);
+void BaseRegisterCommand::configure(std::string param, int line) {
+    setup(RegisterType::get(param), line);
 }
 
 
-int BaseLabelCommand::run(std::string param, int line) {
-    return process(LabelType::get(param), line);
+int BaseLabelCommand::run(std::string param, int line, shared_stack stack) {
+    return process(LabelType::get(param), line, stack);
 }
 
-void BaseLabelCommand::configure(std::string param, int line, shared_stack stack) {
-    setup(LabelType::get(param), line, stack);
+void BaseLabelCommand::configure(std::string param, int line) {
+    setup(LabelType::get(param), line);
 }
 
-int BeginCommand::process(int line) {
+int BeginCommand::process(int line, shared_stack stack) {
     return line + 1;
 }
 
-void BeginCommand::setup(int line, shared_stack stack) {
+void BeginCommand::setup(int line) {
     if (line_ != -1) {
         throw UniqueException("BEGIN command must appear only once", line);
     }
     line_ = line;
 }
 
-int EndCommand::process(int line) {
+int EndCommand::process(int line, shared_stack stack) {
     return -1;
 }
 
-void EndCommand::setup(int line, shared_stack stack) {
+void EndCommand::setup(int line) {
     if (line_ != -1) {
         throw UniqueException("END command must appear only once", line);
     }
@@ -72,142 +72,122 @@ void EndCommand::setup(int line, shared_stack stack) {
 }
 
 
-int PushCommand::process(int val, int line) {
-    stack_->data.push(val);
+int PushCommand::process(int val, int line, shared_stack stack) {
+    stack->data.push(val);
     return line + 1;
 }
 
-void PushCommand::setup(int val, int line, shared_stack stack) {
-    stack_ = std::move(stack);
-}
+void PushCommand::setup(int val, int line) {}
 
 
-int PopCommand::process(int line) {
-    stack_->data.pop();
+int PopCommand::process(int line, shared_stack stack) {
+    stack->data.pop();
     return line + 1;
 }
 
-void PopCommand::setup(int line, shared_stack stack) {
-    stack_ = std::move(stack);
-}
+void PopCommand::setup(int line) {}
 
 
-int PushRCommand::process(RegisterType &val, int line) {
-    stack_->data.push(val.value());
+int PushRCommand::process(RegisterType &val, int line, shared_stack stack) {
+    stack->data.push(val.value());
     return line + 1;
 }
 
-void PushRCommand::setup(RegisterType &val, int line, shared_stack stack) {
-    stack_ = std::move(stack);
-}
+void PushRCommand::setup(RegisterType &val, int line) {}
 
 
-int PopRCommand::process(RegisterType &val, int line) {
-    val.value() = stack_->data.top();
-    stack_->data.pop();
+int PopRCommand::process(RegisterType &val, int line, shared_stack stack) {
+    val.value() = stack->data.top();
+    stack->data.pop();
     return line + 1;
 }
 
-void PopRCommand::setup(RegisterType &val, int line, shared_stack stack) {
-    stack_ = std::move(stack);
-}
+void PopRCommand::setup(RegisterType &val, int line) {}
 
-int AddCommand::process(int line) {
-    int first = stack_->data.top();
-    stack_->data.pop();
-    int second = stack_->data.top();
-    stack_->data.pop();
-    stack_->data.push(first + second);
+int AddCommand::process(int line, shared_stack stack) {
+    int first = stack->data.top();
+    stack->data.pop();
+    int second = stack->data.top();
+    stack->data.pop();
+    stack->data.push(first + second);
     return line + 1;
 }
 
-void AddCommand::setup(int line, shared_stack stack) {
-    stack_ = std::move(stack);
-}
+void AddCommand::setup(int line) {}
 
-int SubCommand::process(int line) {
-    int first = stack_->data.top();
-    stack_->data.pop();
-    int second = stack_->data.top();
-    stack_->data.pop();
-    stack_->data.push(second - first);
+int SubCommand::process(int line, shared_stack stack) {
+    int first = stack->data.top();
+    stack->data.pop();
+    int second = stack->data.top();
+    stack->data.pop();
+    stack->data.push(second - first);
     return line + 1;
 }
 
-void SubCommand::setup(int line, shared_stack stack) {
-    stack_ = std::move(stack);
-}
+void SubCommand::setup(int line) {}
 
-int MulCommand::process(int line) {
-    int first = stack_->data.top();
-    stack_->data.pop();
-    int second = stack_->data.top();
-    stack_->data.pop();
-    stack_->data.push(first * second);
+int MulCommand::process(int line, shared_stack stack) {
+    int first = stack->data.top();
+    stack->data.pop();
+    int second = stack->data.top();
+    stack->data.pop();
+    stack->data.push(first * second);
     return line + 1;
 }
 
-void MulCommand::setup(int line, shared_stack stack) {
-    stack_ = std::move(stack);
-}
+void MulCommand::setup(int line) {}
 
-int DivCommand::process(int line) {
-    int first = stack_->data.top();
-    stack_->data.pop();
-    int second = stack_->data.top();
-    stack_->data.pop();
-    stack_->data.push(second / first);
+int DivCommand::process(int line, shared_stack stack) {
+    int first = stack->data.top();
+    stack->data.pop();
+    int second = stack->data.top();
+    stack->data.pop();
+    stack->data.push(second / first);
     return line + 1;
 }
 
-void DivCommand::setup(int line, shared_stack stack) {
-    stack_ = std::move(stack);
-}
+void DivCommand::setup(int line) {}
 
-int InCommand::process(int line) {
-    int value;
+int InCommand::process(int line, shared_stack stack) {
+    int value = 0;
     std::cout << "Input number: ";
     std::cin >> value;
-    stack_->data.push(value);
+    stack->data.push(value);
     return line + 1;
 }
 
-void InCommand::setup(int line, shared_stack stack) {
-    stack_ = std::move(stack);
-}
+void InCommand::setup(int line) {}
 
-int OutCommand::process(int line) {
-    std::cout << stack_->data.top() << std::endl;
-    stack_->data.pop();
+int OutCommand::process(int line, shared_stack stack) {
+    std::cout << stack->data.top() << std::endl;
+    stack->data.pop();
     return line + 1;
 }
 
-void OutCommand::setup(int line, shared_stack stack) {
-    stack_ = std::move(stack);
-}
+void OutCommand::setup(int line) {}
 
-int LabelCommand::process(LabelType &val, int line) {
+int LabelCommand::process(LabelType &val, int line, shared_stack stack) {
     return line + 1;
 }
 
-void LabelCommand::setup(LabelType &val, int line, shared_stack stack) {
+void LabelCommand::setup(LabelType &val, int line) {
     val.line() = line;
 }
 
-int JumpCommand::process(LabelType &val, int line) {
+int JumpCommand::process(LabelType &val, int line, shared_stack stack) {
     if (val.line() == -1) {
         throw InvalidArgumentException("Can not find label \"" + val.name() + "\" to jump");
     }
     return val.line();
 }
 
-void JumpCommand::setup(LabelType &val, int line, shared_stack stack) {}
+void JumpCommand::setup(LabelType &val, int line) {}
 
-int JumpEqualCommand::process(LabelType &val, int line) {
-    int first = stack_->data.top();
-    stack_->data.pop();
-    int second = stack_->data.top();
-    stack_->data.push(first);
+int JumpEqualCommand::process(LabelType &val, int line, shared_stack stack) {
+    int first = stack->data.top();
+    stack->data.pop();
+    int second = stack->data.top();
+    stack->data.push(first);
     if (first != second) {
         return line + 1;
     }
@@ -217,15 +197,13 @@ int JumpEqualCommand::process(LabelType &val, int line) {
     return val.line();
 }
 
-void JumpEqualCommand::setup(LabelType &val, int line, shared_stack stack) {
-    stack_ = std::move(stack);
-}
+void JumpEqualCommand::setup(LabelType &val, int line) {}
 
-int JumpNotEqualCommand::process(LabelType &val, int line) {
-    int first = stack_->data.top();
-    stack_->data.pop();
-    int second = stack_->data.top();
-    stack_->data.push(first);
+int JumpNotEqualCommand::process(LabelType &val, int line, shared_stack stack) {
+    int first = stack->data.top();
+    stack->data.pop();
+    int second = stack->data.top();
+    stack->data.push(first);
     if (first == second) {
         return line + 1;
     }
@@ -235,15 +213,13 @@ int JumpNotEqualCommand::process(LabelType &val, int line) {
     return val.line();
 }
 
-void JumpNotEqualCommand::setup(LabelType &val, int line, shared_stack stack) {
-    stack_ = std::move(stack);
-}
+void JumpNotEqualCommand::setup(LabelType &val, int line) {}
 
-int JumpGreaterCommand::process(LabelType &val, int line) {
-    int first = stack_->data.top();
-    stack_->data.pop();
-    int second = stack_->data.top();
-    stack_->data.push(first);
+int JumpGreaterCommand::process(LabelType &val, int line, shared_stack stack) {
+    int first = stack->data.top();
+    stack->data.pop();
+    int second = stack->data.top();
+    stack->data.push(first);
     if (first <= second) {
         return line + 1;
     }
@@ -253,15 +229,13 @@ int JumpGreaterCommand::process(LabelType &val, int line) {
     return val.line();
 }
 
-void JumpGreaterCommand::setup(LabelType &val, int line, shared_stack stack) {
-    stack_ = std::move(stack);
-}
+void JumpGreaterCommand::setup(LabelType &val, int line) {}
 
-int JumpGreaterOrEqualCommand::process(LabelType &val, int line) {
-    int first = stack_->data.top();
-    stack_->data.pop();
-    int second = stack_->data.top();
-    stack_->data.push(first);
+int JumpGreaterOrEqualCommand::process(LabelType &val, int line, shared_stack stack) {
+    int first = stack->data.top();
+    stack->data.pop();
+    int second = stack->data.top();
+    stack->data.push(first);
     if (first < second) {
         return line + 1;
     }
@@ -271,15 +245,13 @@ int JumpGreaterOrEqualCommand::process(LabelType &val, int line) {
     return val.line();
 }
 
-void JumpGreaterOrEqualCommand::setup(LabelType &val, int line, shared_stack stack) {
-    stack_ = std::move(stack);
-}
+void JumpGreaterOrEqualCommand::setup(LabelType &val, int line) {}
 
-int JumpLessCommand::process(LabelType &val, int line) {
-    int first = stack_->data.top();
-    stack_->data.pop();
-    int second = stack_->data.top();
-    stack_->data.push(first);
+int JumpLessCommand::process(LabelType &val, int line, shared_stack stack) {
+    int first = stack->data.top();
+    stack->data.pop();
+    int second = stack->data.top();
+    stack->data.push(first);
     if (first >= second) {
         return line + 1;
     }
@@ -289,15 +261,13 @@ int JumpLessCommand::process(LabelType &val, int line) {
     return val.line();
 }
 
-void JumpLessCommand::setup(LabelType &val, int line, shared_stack stack) {
-    stack_ = std::move(stack);
-}
+void JumpLessCommand::setup(LabelType &val, int line) {}
 
-int JumpLessOrEqualCommand::process(LabelType &val, int line) {
-    int first = stack_->data.top();
-    stack_->data.pop();
-    int second = stack_->data.top();
-    stack_->data.push(first);
+int JumpLessOrEqualCommand::process(LabelType &val, int line, shared_stack stack) {
+    int first = stack->data.top();
+    stack->data.pop();
+    int second = stack->data.top();
+    stack->data.push(first);
     if (first > second) {
         return line + 1;
     }
@@ -307,29 +277,23 @@ int JumpLessOrEqualCommand::process(LabelType &val, int line) {
     return val.line();
 }
 
-void JumpLessOrEqualCommand::setup(LabelType &val, int line, shared_stack stack) {
-    stack_ = std::move(stack);
-}
+void JumpLessOrEqualCommand::setup(LabelType &val, int line) {}
 
 
-int CallCommand::process(LabelType &val, int line) {
+int CallCommand::process(LabelType &val, int line, shared_stack stack) {
     if (val.line() == -1) {
         throw InvalidArgumentException("Can not find label \"" + val.name() + "\" to jump");
     }
-    stack_->call.push(line);
+    stack->call.push(line);
     return val.line();
 }
 
-void CallCommand::setup(LabelType &val, int line, shared_stack stack) {
-    stack_ = std::move(stack);
-}
+void CallCommand::setup(LabelType &val, int line) {}
 
-int RetCommand::process(int line) {
-    int to = stack_->call.top();
-    stack_->call.pop();
+int RetCommand::process(int line, shared_stack stack) {
+    int to = stack->call.top();
+    stack->call.pop();
     return to + 1;
 }
 
-void RetCommand::setup(int line, shared_stack stack) {
-    stack_ = std::move(stack);
-}
+void RetCommand::setup(int line) {}

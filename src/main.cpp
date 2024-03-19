@@ -1,45 +1,16 @@
 #include <iostream>
-#include "commands.h"
-#include "parser.h"
-#include "exc.h"
+#include "cpu.h"
+#include "cpu.h"
 
-using namespace std;
-
-int main(int argc, char *argv[]) {
-    if (argc != 2) {
+int main(int argc, char **argv) {
+    if (argc != 3) {
         return 0;
     }
-    try {
-        Parser parser(argv[1]);
-        parser.parse();
-        std::vector<std::tuple<BaseCommand &, std::string>> program = parser.get_program();
-        shared_ptr<CommandStack> stack(new CommandStack());
-        int line = 0;
-        for (auto [command, param]: program) {
-            try {
-                command.configure(param, line, stack);
-            } catch (InvalidArgumentException &e) {
-                throw InvalidArgumentException(e.what(), line + 1);
-            }
-            line++;
-        }
-        line = Begin::instance().get_line();
-        while (-1 < line && line < program.size()) {
-            auto [command, param] = program[line];
-            try {
-                line = command.run(param, line);
-            } catch (InvalidArgumentException &e) {
-                throw InvalidArgumentException(e.what(), line + 1);
-            } catch (std::runtime_error &e) {
-                throw InvalidArgumentException(e.what(), line + 1);
-            }
-        }
-    } catch (InvalidArgumentException &e) {
-        cout << "Error in line " << e.line() << ": " << e.what() << endl;
-    } catch (UniqueException &e) {
-        cout << "Error in line " << e.line() << ": " << e.what() << endl;
-    } catch (std::runtime_error &e) {
-        cout << "Error: " << e.what() << endl;
+    CPUEmulator app(argv[2]);
+    if (std::string(argv[1]) == "build") {
+        app.build(argv[2]);
+    } else if (std::string(argv[1]) == "run") {
+        app.run();
     }
     return 0;
 }

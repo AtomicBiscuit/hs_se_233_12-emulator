@@ -9,14 +9,18 @@ class Parser {
 public:
     Parser() = delete;
 
-    explicit Parser(const std::string &);
+    explicit Parser(std::string);
 
     void parse();
 
+    void parse_binary();
+
     std::vector<std::tuple<BaseCommand &, std::string>> get_program();
 
+    std::vector<std::tuple<eCommands, std::string>> get_raw_program();
+
 private:
-    std::ifstream file_;
+    std::string file_name_;
     std::vector<std::tuple<std::string, std::string>> program_;
     static inline std::map<std::string, BaseCommand &> commands_ = {
             {"BEGIN",  Begin::instance()},
@@ -42,6 +46,6 @@ private:
             {"JBE",    JumpLE::instance()},
             {"CALL",   Call::instance()},
             {"RET",    Ret::instance()},
-            {"/BLANK", Blank::instance()}
+            {"BLANK", Blank::instance()}
     };
 };

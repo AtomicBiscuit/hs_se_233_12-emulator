@@ -150,7 +150,7 @@ namespace stack {
         if (&other == this) {
             return *this;
         }
-        delete[] _data;
+        // delete[] _data;
         _data = new T[other._capacity];
         _capacity = other._capacity;
         _size = other._size;
@@ -212,7 +212,10 @@ namespace stack {
 
     template<class T>
     void Stack<T>::pop() {
-        if (not empty()) --_size;
+        if (empty()) {
+            throw std::runtime_error("Stack is empty");
+        }
+        --_size;
         if (_size * 2 + 1000 < _capacity) {
             _resize(_size);
         }

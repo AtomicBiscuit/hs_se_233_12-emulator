@@ -1,29 +1,31 @@
 #include <string>
 #include <sstream>
+#include <utility>
 #include "parser.h"
 #include "commands.h"
 #include "exc.h"
 
-Parser::Parser(const std::string &a) {
-    this->file_.open(a);
-}
+Parser::Parser(std::string file_name) : file_name_(std::move(file_name)) {}
 
 void Parser::parse() {
-    if (not this->file_.is_open()) {
+    std::ifstream file(file_name_, std::ios::in);
+    if (not file.is_open()) {
         throw std::runtime_error("File is closed");
+    } else if (not program_.empty()) {
+        return;
     }
     std::string line;
     std::string command;
     std::string param;
     int line_number = 1;
-    while (not this->file_.eof()) {
+    while (not file.eof()) {
         command.clear();
         param.clear();
-        std::getline(this->file_, line);
+        std::getline(file, line);
         std::stringstream line_stream(line);
         line_stream >> command;
         if (command.empty() || command.starts_with('/')) {
-            command = "/BLANK";
+            command = "BLANK";
             line_stream.str("");
         } else if (command.ends_with(':')) {
             command.pop_back();
@@ -59,4 +61,31 @@ std::vector<std::tuple<BaseCommand &, std::string>> Parser::get_program() {
         line++;
     }
     return program;
+}
+
+std::vector<std::tuple<eCommands, std::string>> Parser::get_raw_program() {
+    std::vector<std::tuple<eCommands, std::string>> raw_program;
+    auto program = get_program();
+    raw_program.reserve(program.size());
+    for (auto [comma, param]: program) {
+        raw_program.emplace_back(comma.name(), param);
+    }
+    return raw_program;
+}
+
+void Parser::parse_binary() {
+    std::ifstream file(file_name_, std::ios::binary | std::ios::in);
+    if (not file.is_open()) {
+        throw std::runtime_error("File is closed");
+    } else if (not program_.empty()) {
+        return;
+    }
+
+    char param[100]{};
+    uint8_t command = file.get();
+    while (not file.eof()) {
+        file.getline(param, 99, '\0');
+        program_.emplace_back(command_name[static_cast<eCommands>(command)], param);
+        command = file.get();
+    }
 }
