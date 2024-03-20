@@ -73,6 +73,8 @@ public:
     virtual int run(std::string, int, shared_stack) = 0;
 
     virtual void configure(std::string, int) = 0;
+
+    virtual void clear() {};
 };
 
 class BaseParamLessCommand : public BaseCommand {
@@ -132,6 +134,8 @@ public:
 
     void setup(int) override;
 
+    void clear() override;
+
     [[nodiscard]] int get_line() const { return line_; }
 };
 
@@ -144,6 +148,8 @@ public:
     int process(int, shared_stack) override;
 
     void setup(int) override;
+
+    void clear() override;
 
     [[nodiscard]] int get_line() const { return line_; }
 };
@@ -366,3 +372,30 @@ using Call = Singleton<CallCommand>;
 using Ret = Singleton<RetCommand>;
 
 using Blank = Singleton<BlankCommand>;
+
+static std::map<std::string, BaseCommand &> command_by_name = {
+        {"BEGIN", Begin::instance()},
+        {"BEG",   Begin::instance()},
+        {"END",   End::instance()},
+        {"PUSH",  Push::instance()},
+        {"POP",   Pop::instance()},
+        {"PUSHR", PushR::instance()},
+        {"POPR",  PopR::instance()},
+        {"ADD",   Add::instance()},
+        {"SUB",   Sub::instance()},
+        {"MUL",   Mul::instance()},
+        {"DIV",   Div::instance()},
+        {"IN",    In::instance()},
+        {"OUT",   Out::instance()},
+        {"LABEL", Label::instance()},
+        {"JMP",   Jump::instance()},
+        {"JEQ",   JumpE::instance()},
+        {"JNE",   JumpNE::instance()},
+        {"JA",    JumpG::instance()},
+        {"JAE",   JumpGE::instance()},
+        {"JB",    JumpL::instance()},
+        {"JBE",   JumpLE::instance()},
+        {"CALL",  Call::instance()},
+        {"RET",   Ret::instance()},
+        {"BLANK", Blank::instance()}
+};

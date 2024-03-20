@@ -60,6 +60,10 @@ void BeginCommand::setup(int line) {
     line_ = line;
 }
 
+void BeginCommand::clear() {
+    line_ = -1;
+}
+
 int EndCommand::process(int line, shared_stack stack) {
     return -1;
 }
@@ -69,6 +73,10 @@ void EndCommand::setup(int line) {
         throw UniqueException("END command must appear only once", line);
     }
     line_ = line;
+}
+
+void EndCommand::clear() {
+    line_ = -1;
 }
 
 

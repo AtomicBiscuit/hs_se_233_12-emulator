@@ -7,45 +7,18 @@
 
 class Parser {
 public:
-    Parser() = delete;
+    Parser() = default;
 
-    explicit Parser(std::string);
+    void parse(const std::string &);
 
-    void parse();
-
-    void parse_binary();
+    void parse_binary(const std::string &);
 
     std::vector<std::tuple<BaseCommand &, std::string>> get_program();
 
     std::vector<std::tuple<eCommands, std::string>> get_raw_program();
 
+    void clear();
+
 private:
-    std::string file_name_;
     std::vector<std::tuple<std::string, std::string>> program_;
-    static inline std::map<std::string, BaseCommand &> commands_ = {
-            {"BEGIN",  Begin::instance()},
-            {"BEG",    Begin::instance()},
-            {"END",    End::instance()},
-            {"PUSH",   Push::instance()},
-            {"POP",    Pop::instance()},
-            {"PUSHR",  PushR::instance()},
-            {"POPR",   PopR::instance()},
-            {"ADD",    Add::instance()},
-            {"SUB",    Sub::instance()},
-            {"MUL",    Mul::instance()},
-            {"DIV",    Div::instance()},
-            {"IN",     In::instance()},
-            {"OUT",    Out::instance()},
-            {"LABEL",  Label::instance()},
-            {"JMP",    Jump::instance()},
-            {"JEQ",    JumpE::instance()},
-            {"JNE",    JumpNE::instance()},
-            {"JA",     JumpG::instance()},
-            {"JAE",    JumpGE::instance()},
-            {"JB",     JumpL::instance()},
-            {"JBE",    JumpLE::instance()},
-            {"CALL",   Call::instance()},
-            {"RET",    Ret::instance()},
-            {"BLANK", Blank::instance()}
-    };
 };

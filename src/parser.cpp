@@ -5,15 +5,12 @@
 #include "commands.h"
 #include "exc.h"
 
-Parser::Parser(std::string file_name) : file_name_(std::move(file_name)) {}
-
-void Parser::parse() {
-    std::ifstream file(file_name_, std::ios::in);
+void Parser::parse(const std::string &file_name) {
+    std::ifstream file(file_name, std::ios::in);
     if (not file.is_open()) {
         throw std::runtime_error("File is closed");
-    } else if (not program_.empty()) {
-        return;
     }
+    clear();
     std::string line;
     std::string command;
     std::string param;
@@ -49,15 +46,30 @@ void Parser::parse() {
     }
 }
 
+void Parser::parse_binary(const std::string &file_name) {
+    std::ifstream file(file_name, std::ios::binary | std::ios::in);
+    if (not file.is_open()) {
+        throw std::runtime_error("File is closed");
+    }
+    clear();
+    char param[100]{};
+    uint8_t command = file.get();
+    while (not file.eof()) {
+        file.getline(param, 99, '\0');
+        program_.emplace_back(command_name[static_cast<eCommands>(command)], param);
+        command = file.get();
+    }
+}
+
 std::vector<std::tuple<BaseCommand &, std::string>> Parser::get_program() {
     std::vector<std::tuple<BaseCommand &, std::string>> program{};
     program.reserve(program_.size());
     int line = 1;
     for (auto [comma, param]: program_) {
-        if (not commands_.contains(comma)) {
+        if (not command_by_name.contains(comma)) {
             throw InvalidArgumentException("Unknown command \"" + comma + "\"", line);
         }
-        program.emplace_back(commands_.at(comma), param);
+        program.emplace_back(command_by_name.at(comma), param);
         line++;
     }
     return program;
@@ -73,19 +85,6 @@ std::vector<std::tuple<eCommands, std::string>> Parser::get_raw_program() {
     return raw_program;
 }
 
-void Parser::parse_binary() {
-    std::ifstream file(file_name_, std::ios::binary | std::ios::in);
-    if (not file.is_open()) {
-        throw std::runtime_error("File is closed");
-    } else if (not program_.empty()) {
-        return;
-    }
-
-    char param[100]{};
-    uint8_t command = file.get();
-    while (not file.eof()) {
-        file.getline(param, 99, '\0');
-        program_.emplace_back(command_name[static_cast<eCommands>(command)], param);
-        command = file.get();
-    }
+void Parser::clear() {
+    program_.clear();
 }

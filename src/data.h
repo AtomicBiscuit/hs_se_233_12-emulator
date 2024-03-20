@@ -33,6 +33,10 @@ public:
 
     const std::string &name() { return name_; }
 
+    static void clear_all() {
+        regs_.clear();
+    }
+
     const static inline std::vector<std::string> available = {"ax", "bx", "cx", "dx", "ex"};
 };
 
@@ -66,6 +70,10 @@ public:
         }
         labels_.push_back(LabelType(name));
         return labels_.back();
+    }
+
+    static void clear_all() {
+        labels_.clear();
     }
 
     int &line() { return line_; }

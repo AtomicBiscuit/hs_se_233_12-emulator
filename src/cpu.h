@@ -6,15 +6,16 @@ class CPUEmulator {
 public:
     CPUEmulator() = delete;
 
-    explicit CPUEmulator(const std::string &file_name) : proc(file_name) {}
+    explicit CPUEmulator(std::string file_name) : file_name_(std::move(file_name)) {}
 
-    void build(const std::string &file_name) {
-        proc.build(file_name);
+    void build(const std::string &output_file_name) {
+        proc_.build(file_name_, output_file_name);
+        clear();
     }
 
     void run() {
-        proc.load();
-        auto program = proc.get_program();
+        proc_.load(file_name_);
+        auto program = proc_.get_program();
         int line = Begin::instance().get_line();
         auto stack = std::make_shared<CommandStack>();
         while (-1 < line && line < program.size()) {
@@ -22,15 +23,25 @@ public:
             try {
                 line = command.run(param, line, stack);
             } catch (InvalidArgumentException &e) {
-                std::cout << "Error in line " << line << ": " << e.what() << std::endl;
+                std::cerr << "Error in line " << line << ": " << e.what() << std::endl;
+                break;
             } catch (UniqueException &e) {
-                std::cout << "Error in line " << line << ": " << e.what() << std::endl;
+                std::cerr << "Error in line " << line << ": " << e.what() << std::endl;
+                break;
             } catch (std::runtime_error &e) {
-                std::cout << "Error in line " << line << ": " << e.what() << std::endl;
+                std::cerr << "Error in line " << line << ": " << e.what() << std::endl;
+                break;
             }
         }
+        clear();
     }
 
+    static void clear() {
+        Preprocessor::clear();
+    }
+
+
 private:
-    Preprocessor proc;
+    std::string file_name_;
+    Preprocessor proc_;
 };
