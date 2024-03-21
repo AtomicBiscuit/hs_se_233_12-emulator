@@ -12,22 +12,18 @@ public:
 
     void build(const std::string &file_name, const std::string &output_file_name) {
         std::vector<std::tuple<BaseCommand &, std::string>> program;
-        try {
-            parser_.parse(file_name);
-            program = parser_.get_program();
-        } catch (InvalidArgumentException &e) {
-            std::cerr << e.what() << std::endl;
-            exit(1);
-        } catch (std::runtime_error &e) {
-            std::cerr << e.what() << std::endl;
-            exit(1);
-        }
+        parser_.parse(file_name);
+        program = parser_.get_program();
+
         int line = 0;
         for (auto [command, param]: program) {
             try {
                 command.configure(param, line);
             } catch (InvalidArgumentException &e) {
-                std::cerr << InvalidArgumentException(e.what(), line + 1).what() << std::endl;
+                std::cerr << "Error in line " << line + 1 << ": " << e.what() << std::endl;
+                exit(1);
+            } catch (UniqueException &e) {
+                std::cerr << "Error in line " << line + 1 << ": " << e.what() << std::endl;
                 exit(1);
             }
             line++;

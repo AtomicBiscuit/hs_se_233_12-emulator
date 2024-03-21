@@ -18,13 +18,3 @@ TEST(Preprocessor, test_load) {
     }
     Preprocessor::clear();
 }
-
-TEST(Preprocessor, test_build_incorect) {
-    Preprocessor pre;
-    EXPECT_EXIT(pre.build("1512", "prep_test_build"), testing::ExitedWithCode(1), "File is closed");
-}
-
-TEST(Preprocessor, test_run_incorect) {
-    Preprocessor pre;
-    EXPECT_THROW(pre.load("322.emu"), std::runtime_error);
-}

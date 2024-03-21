@@ -25,11 +25,11 @@ target_link_libraries(Emulator INTERFACE Preprocessor)
 
 target_link_libraries(Main PUBLIC Emulator)
 
-add_custom_target(Fibonacci Main run ./../../test/data/fibonacci.txt.emu DEPENDS ./../../test/data/fibonacci.txt.emu)
+add_custom_target(Fibonacci Main run ./../../test/data/fibonacci_1.txt.emu DEPENDS ./../../test/data/fibonacci_1.txt.emu)
 
 add_custom_command(
-        OUTPUT ./../../test/data/fibonacci.txt.emu
-        COMMAND Main build ./../../test/data/fibonacci.txt
+        OUTPUT ./../../test/data/fibonacci_1.txt.emu
+        COMMAND Main build ./../../test/data/fibonacci_1.txt
 )
 
 add_custom_target(Factorial Main run ./../../test/data/factor_rec.txt.emu DEPENDS ./../../test/data/factor_rec.txt.emu)
